@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>Weather of US Cities</title>
+
+</head>
+
+<body>
+
+<input type="text" id="textData" class="interface" value="Boston"></input>
+<input type="button" id="addData" class="interface" value="add data"></input>
+<input type="button" id="reset" value="Reset"></input>
+  <canvas id="myCanvas"></canvas>
+<!--------------------------Style block------------------------------------------------->
+<style>
+  #addData{width: 15%;}
+  #reset{float: right;}
+  .interface{vertical-align: top;}
+</style>
+<!-----------------------End of style block------------------------------------------------>
+  <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+  <script>
+  <!---------------------------Global variables------------------------------------------------>
+  var apikey = 'Secret api key goes here.';
+  var userinput;
+  var d;
+  var l;
+  <!------------------------------------------------------------------------------------------>
+
+  <!---------------------------Functions------------------------------------------------>
+
+  function getRandomColorHex() {
+      var hex = "0123456789ABCDEF",
+          color = "#";
+      for (var i = 1; i <= 6; i++) {
+        color += hex[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+  $(function() {
+
+    function addData( l, d) {
+
+      chart.data.datasets[0].data.push(d);
+      chart.data.labels.push(l);
+
+      chart.update();
+  }
+
+  function talkToServer() {
+    <!--------------------------Ajax call to the open weather----------------------------------->
+    $.ajax({
+      url: userinput,
+      dataType: 'json',
+      type: 'get',
+      cache: 'false',
+      success: function(data) {
+      d=JSON.parse(data.main.temp);
+      l=($('#textData').val());
+      addData( $('#textData').val(), d);
+     }
+    });
+  }
+<!------------------End of ajax call---------------------->
+
+
+<!---------------------------------End of main functions--------------------------------------------------------->
+
+Chart.scaleService.updateScaleDefaults('linear', {
+    ticks: {
+        min: 0
+    }
+});
+
+      <!------------------Start of chart data---------------------->
+      var canv = $('#myCanvas');
+      var chart = new Chart(canv, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Weather of US cities',
+            data: [],
+
+            backgroundColor : [
+         getRandomColorHex(),
+         getRandomColorHex(),
+         getRandomColorHex(),
+         getRandomColorHex(),
+         getRandomColorHex()
+       ],
+       borderColor : [
+         "#111",
+         "#111",
+         "#111",
+         "#111",
+         "#111"
+       ],
+       borderWidth : 1
+          }]
+        },
+        options: {}
+      });
+
+      <!------------------End of chart data----------------->
+
+      $('#addData').click(function(){
+        userinput = 'http://api.openweathermap.org/data/2.5/weather?q='+$('#textData').val()+apikey;
+        talkToServer();
+        $('#textData').select();
+      });
+
+      $(document).on('keypress',function(e) {
+      if(e.which == 13) {
+        userinput = 'http://api.openweathermap.org/data/2.5/weather?q='+$('#textData').val()+apikey;
+        talkToServer();
+        $('#textData').select();
+    }
+    });
+    
+      $('#reset').click(function(){
+         document.location.reload();;
+      });
+    });
+  </script>
+
+</body>
+
+</html>
